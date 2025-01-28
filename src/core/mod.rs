@@ -3,6 +3,7 @@ use structopt::StructOpt;
 use crate::error::Result;
 
 mod generate;
+mod models;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "nestlib")]
@@ -15,7 +16,7 @@ impl Opt {
     pub fn run(&self) -> Result<()> {
         match self {
             Opt::Generate(generate) => {
-                generate.run();
+                generate.run()?;
                 Ok(())
             }
         }

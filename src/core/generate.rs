@@ -2,6 +2,8 @@ use structopt::StructOpt;
 
 use crate::{error::Result, utils::read_dir_contents};
 
+use super::models::Package;
+
 #[derive(Debug, StructOpt)]
 pub struct Generate {
     #[structopt(short, long, parse(from_os_str))]
@@ -14,7 +16,8 @@ impl Generate {
         let paths = read_dir_contents(&path)?;
 
         for path in paths {
-            println!("{}", path);
+            let package = Package::from_file(&path)?;
+            println!("{:?}", package);
         }
 
         Ok(())
