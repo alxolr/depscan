@@ -1,5 +1,7 @@
 use structopt::StructOpt;
 
+use crate::{error::Result, utils::read_dir_contents};
+
 #[derive(Debug, StructOpt)]
 pub struct Generate {
     #[structopt(short, long, parse(from_os_str))]
@@ -7,10 +9,14 @@ pub struct Generate {
 }
 
 impl Generate {
-    pub fn run(&self) {
-        println!(
-            "Generating the dependency graph for the project at {:?}",
-            self.path
-        );
+    pub fn run(&self) -> Result<()> {
+        let path = self.path.clone().ok_or("Path not provided".to_string())?;
+        let paths = read_dir_contents(&path)?;
+
+        for path in paths {
+            println!("{}", path);
+        }
+
+        Ok(())
     }
 }

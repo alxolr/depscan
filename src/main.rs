@@ -3,6 +3,7 @@ use core::Opt;
 use error::Result;
 use structopt::StructOpt;
 
+mod utils;
 mod core;
 mod error;
 
