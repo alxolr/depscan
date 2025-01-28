@@ -1,4 +1,8 @@
-use std::{fs, path::PathBuf};
+use std::{
+    collections::{HashMap, VecDeque},
+    fs,
+    path::PathBuf,
+};
 
 use crate::error::Result;
 
@@ -50,4 +54,54 @@ pub fn read_dir_contents(directory_path: &PathBuf) -> Result<Vec<String>> {
         .collect();
 
     Ok(package_paths)
+}
+
+pub fn topological_sort(graph: &HashMap<String, Vec<String>>) -> Vec<String> {
+    let libs: Vec<String> = graph.clone().into_iter().map(|(key, _)| key).collect();
+    let mut sorted_libs = Vec::with_capacity(libs.len());
+    let direct_graph = graph.clone();
+    let indirect_graph = graph
+        .into_iter()
+        .fold(HashMap::new(), |mut acc, (key, deps)| {
+            for dep in deps {
+                acc.entry(dep).or_insert(vec![]).push(key.clone());
+            }
+
+            acc
+        });
+
+    let mut dependency_count = HashMap::new();
+
+    for lib in libs.iter() {
+        let count = direct_graph.get(lib).map_or(0, |parents| {
+            parents
+                .iter()
+                .filter(|parent| libs.contains(&parent))
+                .count()
+        });
+        dependency_count.insert(lib, count);
+    }
+
+    let mut queue: VecDeque<_> = dependency_count
+        .iter()
+        .filter(|&(_, &count)| count == 0)
+        .map(|(&lib, _)| lib)
+        .collect();
+
+    while let Some(lib) = queue.pop_front() {
+        sorted_libs.push(lib.to_string());
+
+        if let Some(children) = indirect_graph.get(lib) {
+            for child in children.iter().filter(|child| libs.contains(&child)) {
+                if let Some(count) = dependency_count.get_mut(&child) {
+                    *count -= 1;
+                    if *count == 0 {
+                        queue.push_back(&child);
+                    }
+                }
+            }
+        }
+    }
+
+    sorted_libs
 }
