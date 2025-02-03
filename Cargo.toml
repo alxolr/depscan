@@ -7,6 +7,7 @@ description = "A command line tool to help with managing massive trees of interd
 include = ["**/*.rs", "Cargo.toml"]
 license = "MIT OR Apache-2.0"
 keywords = ["cli", "productivity"]
+repository = "https://github.com/alxolr/depzen"
 
 [dependencies]
 derive_more = { version = "1.0.0", features = ["from"] }
