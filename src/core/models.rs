@@ -34,8 +34,7 @@ impl Package {
             package.dev_dependencies,
             package.peer_dependencies,
         ])
-        .into_iter()
-        .map(|(name, _)| name)
+        .into_keys()
         .collect::<HashSet<_>>()
         .into_iter()
         .collect();

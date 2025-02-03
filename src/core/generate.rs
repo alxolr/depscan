@@ -47,10 +47,7 @@ impl Generate {
             .collect::<HashMap<_, _>>();
 
         // Clean the depedencies that are not self referencing
-        let unique_libs = package_map
-            .iter()
-            .map(|(key, _)| key)
-            .collect::<HashSet<&String>>();
+        let unique_libs = package_map.keys().collect::<HashSet<&String>>();
 
         let package_map: HashMap<String, Vec<String>> = package_map
             .clone()

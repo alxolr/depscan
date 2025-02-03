@@ -19,7 +19,7 @@ impl Toposort {
             .path
             .clone()
             .ok_or("File path not provided".to_string())?;
-        let contents = read_to_string(&path)?;
+        let contents = read_to_string(path)?;
 
         let graph: HashMap<String, Vec<String>> = serde_json::from_str(&contents)?;
 
@@ -60,9 +60,9 @@ impl Toposort {
     }
 }
 
-fn merge_sets(sets: &Vec<HashSet<String>>) -> HashSet<&String> {
+fn merge_sets(sets: &[HashSet<String>]) -> HashSet<&String> {
     sets.iter()
         .take(sets.len() - 1)
-        .flat_map(|set| set.into_iter())
+        .flat_map(|set| set.iter())
         .collect()
 }

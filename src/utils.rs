@@ -57,18 +57,19 @@ pub fn read_dir_contents(directory_path: &PathBuf) -> Result<Vec<String>> {
 }
 
 pub fn topological_sort(graph: &HashMap<String, Vec<String>>) -> Vec<String> {
-    let libs: Vec<String> = graph.clone().into_iter().map(|(key, _)| key).collect();
+    let libs: Vec<String> = graph.clone().into_keys().collect();
     let mut sorted_libs = Vec::with_capacity(libs.len());
     let direct_graph = graph.clone();
-    let indirect_graph = graph
-        .into_iter()
-        .fold(HashMap::new(), |mut acc, (key, deps)| {
+    let indirect_graph = graph.iter().fold(
+        HashMap::<&String, Vec<String>>::new(),
+        |mut acc, (key, deps)| {
             for dep in deps {
-                acc.entry(dep).or_insert(vec![]).push(key.clone());
+                acc.entry(dep).or_default().push(key.clone());
             }
 
             acc
-        });
+        },
+    );
 
     let mut dependency_count = HashMap::new();
 
@@ -76,7 +77,7 @@ pub fn topological_sort(graph: &HashMap<String, Vec<String>>) -> Vec<String> {
         let count = direct_graph.get(lib).map_or(0, |parents| {
             parents
                 .iter()
-                .filter(|parent| libs.contains(&parent))
+                .filter(|parent| libs.contains(parent))
                 .count()
         });
         dependency_count.insert(lib, count);
@@ -92,11 +93,11 @@ pub fn topological_sort(graph: &HashMap<String, Vec<String>>) -> Vec<String> {
         sorted_libs.push(lib.to_string());
 
         if let Some(children) = indirect_graph.get(lib) {
-            for child in children.iter().filter(|child| libs.contains(&child)) {
+            for child in children.iter().filter(|child| libs.contains(child)) {
                 if let Some(count) = dependency_count.get_mut(&child) {
                     *count -= 1;
                     if *count == 0 {
-                        queue.push_back(&child);
+                        queue.push_back(child);
                     }
                 }
             }
