@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use serde_json::to_string_pretty;
 use structopt::StructOpt;
@@ -13,6 +13,8 @@ pub struct Generate {
     path: Option<std::path::PathBuf>,
     #[structopt(long)]
     json: bool,
+    #[structopt(long)]
+    dot: bool,
     #[structopt(
         long,
         short,
@@ -44,8 +46,44 @@ impl Generate {
             })
             .collect::<HashMap<_, _>>();
 
+        // Clean the depedencies that are not self referencing
+        let unique_libs = package_map
+            .iter()
+            .map(|(key, _)| key)
+            .collect::<HashSet<&String>>();
+
+        let package_map: HashMap<String, Vec<String>> = package_map
+            .clone()
+            .into_iter()
+            .map(|(key, val)| {
+                (
+                    key,
+                    val.into_iter()
+                        .filter(|dep| unique_libs.contains(dep))
+                        .collect::<Vec<String>>(),
+                )
+            })
+            .collect();
+
         if self.json {
             println!("{}", to_string_pretty(&package_map)?);
+        }
+
+        if self.dot {
+            let lines: Vec<String> = package_map
+                .into_iter()
+                .flat_map(|(name, deps)| {
+                    deps.iter()
+                        .map(|dep_name| format!("\"{}\" -> \"{}\"", name, dep_name))
+                        .collect::<Vec<String>>()
+                })
+                .collect();
+
+            println!("digraph G {{");
+            for line in lines {
+                println!("  {};", line);
+            }
+            println!("}}")
         }
 
         Ok(())

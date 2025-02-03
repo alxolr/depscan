@@ -3,8 +3,9 @@ use structopt::StructOpt;
 use crate::error::Result;
 
 mod generate;
+mod list;
 mod models;
-pub mod toposort;
+mod toposort;
 
 #[derive(StructOpt)]
 #[structopt(name = "nestlib")]
@@ -16,6 +17,8 @@ pub enum Opt {
         about = "Topological Sorting on the given dependency graph"
     )]
     Toposort(toposort::Toposort),
+    #[structopt(name = "list", about = "List packages and versions")]
+    List(list::List),
 }
 
 impl Opt {
@@ -27,6 +30,10 @@ impl Opt {
             }
             Opt::Toposort(toposort) => {
                 toposort.run()?;
+                Ok(())
+            }
+            Opt::List(list) => {
+                list.run()?;
                 Ok(())
             }
         }

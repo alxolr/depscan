@@ -10,6 +10,7 @@ use crate::error::Result;
 #[derive(Debug, Clone, Deserialize)]
 pub struct Package {
     pub name: String,
+    pub version: String,
     pub dependencies: Vec<String>,
 }
 
@@ -17,6 +18,7 @@ pub struct Package {
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct PackageJson {
     pub name: String,
+    pub version: String,
     pub dependencies: Option<HashMap<String, String>>,
     pub dev_dependencies: Option<HashMap<String, String>>,
     pub peer_dependencies: Option<HashMap<String, String>>,
@@ -40,6 +42,7 @@ impl Package {
 
         Ok(Package {
             name: package.name,
+            version: package.version,
             dependencies,
         })
     }
